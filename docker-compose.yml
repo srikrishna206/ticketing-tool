@@ -23,24 +23,24 @@ services:
       - postgres
     environment:
       DATABASE_URL: postgresql+asyncpg://ticket_user:ticket_pass@postgres:5432/ticketing
-      PYTHONUNBUFFERED: 1
     ports:
       - "8000:8000"
     networks:
       - ticketnet
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: frontend-app
     depends_on:
       - backend
     ports:
       - "3000:80"
+    environment:
+      REACT_APP_API_URL: http://13.127.193.57:8000
     networks:
       - ticketnet
-    environment:
-      # 👇 Point frontend to backend using host's public IP
-      REACT_APP_API_URL: http://13.127.193.57:8000
 
   admin:
     build: ./admin
@@ -49,11 +49,10 @@ services:
       - backend
     ports:
       - "3001:80"
+    environment:
+      REACT_APP_API_URL: http://13.127.193.57:8000
     networks:
       - ticketnet
-    environment:
-      # 👇 Point admin frontend to backend using host's public IP
-      REACT_APP_API_URL: http://13.127.193.57:8000
 
 volumes:
   postgres_data:
