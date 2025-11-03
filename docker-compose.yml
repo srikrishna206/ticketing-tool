@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: ticket_user
+      POSTGRES_PASSWORD: ticket_pass
+      POSTGRES_DB: ticketing
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: backend-app
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://ticket_user:ticket_pass@postgres:5432/ticketing
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    container_name: frontend-app
+    ports:
+      - "3000:80"
+
+  admin:
+    build: ./admin
+    container_name: admin-app
+    ports:
+      - "3001:80"
+
+volumes:
+  postgres_data:
