@@ -49,7 +49,7 @@ pipeline {
                           POSTGRES_PASSWORD: admin123
                           POSTGRES_DB: ticketingdb
                         ports:
-                          - "5432:5432"
+                          - "5433:5433"
                         volumes:
                           - pg_data:/var/lib/postgresql/data
 
@@ -62,7 +62,7 @@ pipeline {
                         environment:
                           DATABASE_URL: postgres://admin:admin123@postgres:5432/ticketingdb
                         ports:
-                          - "8000:8000"
+                          - "3003:3003"
 
                       frontend:
                         image: ${FRONTEND_IMAGE}
@@ -71,7 +71,7 @@ pipeline {
                         depends_on:
                           - backend
                         ports:
-                          - "3000:3000"
+                          - "3004:3004"
 
                       admin:
                         image: ${ADMIN_IMAGE}
@@ -80,7 +80,7 @@ pipeline {
                         depends_on:
                           - backend
                         ports:
-                          - "4000:4000"
+                          - "3005:3005"
 
                     volumes:
                       pg_data:
