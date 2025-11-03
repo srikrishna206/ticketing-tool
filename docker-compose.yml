@@ -39,8 +39,8 @@ services:
     networks:
       - ticketnet
     environment:
-      # 👇 Point frontend to backend container (internal network)
-      REACT_APP_API_URL: http://backend-app:8000
+      # 👇 Point frontend to backend using host's public IP
+      REACT_APP_API_URL: http://13.127.193.57:8000
 
   admin:
     build: ./admin
@@ -52,8 +52,8 @@ services:
     networks:
       - ticketnet
     environment:
-      # 👇 Point admin frontend to backend container
-      REACT_APP_API_URL: http://backend-app:8000
+      # 👇 Point admin frontend to backend using host's public IP
+      REACT_APP_API_URL: http://13.127.193.57:8000
 
 volumes:
   postgres_data:
