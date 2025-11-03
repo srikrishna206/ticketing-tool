@@ -22,9 +22,7 @@ services:
     depends_on:
       - postgres
     environment:
-      # ✅ Corrected connection string for async SQLAlchemy
       DATABASE_URL: postgresql+asyncpg://ticket_user:ticket_pass@postgres:5432/ticketing
-      # Optional: add CORS or other configs here
       PYTHONUNBUFFERED: 1
     ports:
       - "8000:8000"
@@ -41,7 +39,7 @@ services:
     networks:
       - ticketnet
     environment:
-      # Make frontend talk to backend container
+      # 👇 Point frontend to backend container (internal network)
       REACT_APP_API_URL: http://backend-app:8000
 
   admin:
@@ -54,7 +52,7 @@ services:
     networks:
       - ticketnet
     environment:
-      # Admin frontend API endpoint
+      # 👇 Point admin frontend to backend container
       REACT_APP_API_URL: http://backend-app:8000
 
 volumes:
