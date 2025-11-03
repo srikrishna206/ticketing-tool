@@ -20,7 +20,8 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: postgres://ticket_user:ticket_pass@postgres:5432/ticketing
+      # ✅ Corrected connection string for async SQLAlchemy
+      DATABASE_URL: postgresql+asyncpg://ticket_user:ticket_pass@postgres:5432/ticketing
     ports:
       - "8000:8000"
 
