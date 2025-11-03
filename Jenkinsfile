@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     environment {
-        COMPOSE_FILE = 'docker-compose.yml'
-        // Your actual local image names (or replace with ECR/DockerHub if pushed)
+        // Docker image names (update if hosted in DockerHub or ECR)
         ADMIN_IMAGE = 'ticketing-tool-new-admin:latest'
         FRONTEND_IMAGE = 'ticketing-tool-new-frontend:latest'
         BACKEND_IMAGE = 'ticketing-tool-new-backend:latest'
@@ -13,6 +12,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
+                echo "📦 Checking out latest code from GitHub..."
                 git branch: 'main', url: 'https://github.com/sandeepvilla1612/ticketing-tool.git'
             }
         }
@@ -20,79 +20,63 @@ pipeline {
         stage('Set up Environment') {
             steps {
                 sh '''
-                echo "Setting up environment variables..."
+                echo "🧩 Setting up environment variables..."
                 if [ -f env.template ]; then
                     cp env.template .env
+                    echo "✅ .env file created from env.template"
                 else
-                    echo "No env.template found, skipping copy..."
+                    echo "⚠️ No env.template found, skipping..."
                 fi
                 '''
             }
         }
 
-        stage('Deploy Using Docker Compose') {
+        stage('Deploy New Containers') {
             steps {
                 script {
                     sh '''
-                    echo "Creating docker-compose.yml dynamically..."
+                    echo "🛑 Stopping and removing any old containers..."
+                    docker ps -aq | xargs -r docker stop
+                    docker ps -aq | xargs -r docker rm
 
-                    cat > docker-compose.yml <<EOF
-                    version: '3.8'
+                    echo "🧹 Removing old networks if exist..."
+                    docker network rm ticketing-network || true
 
-                    services:
-                      postgres:
-                        image: ${POSTGRES_IMAGE}
-                        container_name: postgres
-                        restart: always
-                        environment:
-                          POSTGRES_USER: admin
-                          POSTGRES_PASSWORD: admin123
-                          POSTGRES_DB: ticketingdb
-                        ports:
-                          - "5433:5433"
-                        volumes:
-                          - pg_data:/var/lib/postgresql/data
+                    echo "🌐 Creating new Docker network..."
+                    docker network create ticketing-network
 
-                      backend:
-                        image: ${BACKEND_IMAGE}
-                        container_name: backend
-                        restart: always
-                        depends_on:
-                          - postgres
-                        environment:
-                          DATABASE_URL: postgres://admin:admin123@postgres:5432/ticketingdb
-                        ports:
-                          - "3003:3003"
+                    echo "🐘 Starting PostgreSQL container..."
+                    docker run -d --name postgres \
+                        --network ticketing-network \
+                        -e POSTGRES_USER=admin \
+                        -e POSTGRES_PASSWORD=admin123 \
+                        -e POSTGRES_DB=ticketingdb \
+                        -p 5433:5432 \
+                        -v pg_data:/var/lib/postgresql/data \
+                        ${POSTGRES_IMAGE}
 
-                      frontend:
-                        image: ${FRONTEND_IMAGE}
-                        container_name: frontend
-                        restart: always
-                        depends_on:
-                          - backend
-                        ports:
-                          - "3004:3004"
+                    echo "⚙️ Starting Backend container..."
+                    docker run -d --name backend \
+                        --network ticketing-network \
+                        -e DATABASE_URL=postgres://admin:admin123@postgres:5432/ticketingdb \
+                        -p 3003:3003 \
+                        ${BACKEND_IMAGE}
 
-                      admin:
-                        image: ${ADMIN_IMAGE}
-                        container_name: admin
-                        restart: always
-                        depends_on:
-                          - backend
-                        ports:
-                          - "3005:3005"
+                    echo "🖥️ Starting Frontend container..."
+                    docker run -d --name frontend \
+                        --network ticketing-network \
+                        -e REACT_APP_API_URL=http://backend:3003 \
+                        -p 3004:3000 \
+                        ${FRONTEND_IMAGE}
 
-                    volumes:
-                      pg_data:
-                    EOF
+                    echo "🧑‍💼 Starting Admin container..."
+                    docker run -d --name admin \
+                        --network ticketing-network \
+                        -e REACT_APP_API_URL=http://backend:3003 \
+                        -p 3005:3000 \
+                        ${ADMIN_IMAGE}
 
-                    echo "Stopping old containers..."
-                    docker compose down || true
-
-                    echo "Starting new containers..."
-                    docker compose up -d
-
-                    echo "Deployment completed!"
+                    echo "🚀 All containers started successfully!"
                     '''
                 }
             }
@@ -101,8 +85,10 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 sh '''
-                echo "Verifying running containers..."
+                echo "🔍 Checking running containers..."
                 docker ps
+
+                echo "✅ Deployment verification complete!"
                 '''
             }
         }
@@ -110,10 +96,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployment successful!"
+            echo "🎉 Deployment successful! All containers are up and running."
         }
         failure {
-            echo "❌ Deployment failed. Please check Jenkins logs."
+            echo "❌ Deployment failed. Check the Jenkins console logs for errors."
         }
     }
 }
