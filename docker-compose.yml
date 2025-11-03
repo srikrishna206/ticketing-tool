@@ -23,6 +23,7 @@ services:
       - postgres
     environment:
       DATABASE_URL: postgresql+asyncpg://ticket_user:ticket_pass@postgres:5432/ticketing
+      PYTHONUNBUFFERED: 1
     ports:
       - "8000:8000"
     networks:
@@ -43,7 +44,9 @@ services:
       - ticketnet
 
   admin:
-    build: ./admin
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
     container_name: admin-app
     depends_on:
       - backend
