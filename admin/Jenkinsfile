@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "ticketing-app"
+        CONTAINER_NAME = "ticketingtool"
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/krishnamounikavengala/TicketingTool.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo "Building Docker image..."
+                    sh "docker build -t ${IMAGE_NAME}:latest ."
+                }
+            }
+        }
+
+        stage('Deploy New Container') {
+            steps {
+                script {
+                    echo "Deploying new container..."
+                    
+                    // Stop and remove old container if exists
+                    sh "docker rm -f ${CONTAINER_NAME} || true"
+                    
+                    // Run new container
+                    sh "docker run -d -p 80:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}:latest"
+                }
+            }
+        }
+
+        stage('Clean Unused Images') {
+            steps {
+                script {
+                    echo "Cleaning unused Docker images..."
+                    sh "docker image prune -f"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Deployment successful!'
+        }
+        failure {
+            echo '❌ Deployment failed!'
+        }
+    }
+}

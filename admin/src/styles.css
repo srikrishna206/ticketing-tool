@@ -1,0 +1,109 @@
+/* Jira-like design tokens (customized sidebar theme) */
+:root{
+  --bg:#F4F5F7; /* neutral background */
+  --sidebar:#2f2d36ff; /* customized dark sidebar */
+  --accent:#0052CC; /* Jira Blue (used for buttons, not sidebar) */
+  --accent-600:#0747A6;
+  --muted:#6B7280;
+  --card:#ffffff;
+  --focus: 3px solid rgba(255,255,255,0.45); /* white-ish focus ring on dark */
+  --radius:8px;
+  --surface-100:#091E42;
+  --text-100:#172B4D;
+  --success:#36B37E;
+  --danger:#DE350B;
+  --font-stack: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Base & accessibility */
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{margin:0;font-family:var(--font-stack);background:var(--bg);color:var(--text-100);line-height:1.4;font-size:15px}
+.skip-link{position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden}
+.skip-link:focus{left:8px;top:8px;width:auto;height:auto;padding:8px 12px;background:#fff;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,0.16)}
+
+/* App Shell */
+.app-shell{display:flex;min-height:100vh}
+.sidebar{width:260px;background:var(--sidebar);color:white;display:flex;flex-direction:column;align-items:flex-start;padding:20px;gap:12px}
+.sidebar-brand{font-weight:700;display:flex;align-items:center;gap:8px;font-size:18px}
+.sidebar-nav{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:8px}
+.nav-link{
+  color:rgba(255,255,255,0.92);
+  text-decoration:none;
+  padding:8px 10px;
+  border-radius:6px;
+  display:block;
+  transition:background 0.2s;
+}
+.nav-link:focus{
+  outline:none;
+  box-shadow:var(--focus);
+  background:rgba(255,255,255,0.08);
+}
+.nav-link:hover{
+  background:rgba(255,255,255,0.06);
+}
+
+.sidebar-footer{margin-top:auto;width:100%}
+.user-info{background:rgba(255,255,255,0.08);padding:10px;border-radius:6px}
+
+/* Content */
+.content{flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:64px;background:linear-gradient(90deg, rgba(255,255,255,0.02), transparent);display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid rgba(9,30,66,0.04)}
+.app-title{font-size:16px;margin:0;color:var(--surface-100);font-weight:600}
+
+/* Main */
+.main{padding:20px;display:block}
+.card{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(9,30,66,0.06);margin-bottom:16px}
+
+/* Layout helpers */
+.grid{display:grid;grid-template-columns:1fr 340px;gap:16px}
+@media (max-width:900px){
+  .grid{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .app-shell{flex-direction:column}
+  .topbar{position:sticky;top:0;z-index:10}
+}
+
+/* Forms & table */
+.form-row{margin-bottom:10px;display:flex;flex-direction:column}
+input,select,textarea{padding:10px;border:1px solid #E6EEF8;border-radius:6px;font-size:14px}
+input:focus,select:focus,textarea:focus{outline:none;box-shadow:var(--focus)}
+.btn{background:var(--accent);color:white;padding:8px 12px;border-radius:6px;border:0;cursor:pointer}
+.btn:focus{outline:none;box-shadow:var(--focus)}
+.btn-ghost{background:transparent;border:1px solid rgba(9,30,66,0.06);color:var(--text-100)}
+
+/* Kanban */
+.kanban{display:flex;gap:12px;align-items:flex-start;overflow:auto;padding-bottom:8px}
+.kanban-column{min-width:260px;background:#F1F3F6;border-radius:8px;padding:8px;height:520px;overflow:auto;border:1px solid rgba(9,30,66,0.04)}
+.kanban-column h4{margin:0 0 8px 0;color:var(--surface-100);font-weight:600}
+.card-item{background:white;padding:10px;border-radius:6px;margin-bottom:8px;box-shadow:0 1px 3px rgba(9,30,66,0.04);cursor:grab;border-left:4px solid transparent}
+.card-item[data-priority="P0"]{border-left-color:var(--danger)}
+.card-item[data-priority="P1"]{border-left-color:#FF8B00}
+.card-item[data-priority="P2"]{border-left-color:#FFC400}
+.card-item[data-priority="P3"]{border-left-color:#00B8D9}
+.card-item:focus{outline:none;box-shadow:var(--focus)}
+
+/* small text */
+.small{font-size:13px;color:var(--muted)}
+
+/* high contrast badges */
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#E6F0FF;color:#003B75;font-weight:600;font-size:12px}
+
+/* table */
+.table{width:100%;border-collapse:collapse}
+.table th{background:#F7F8FA;padding:10px;text-align:left;font-size:13px}
+.table td{padding:10px;border-bottom:1px solid #F1F3F6}
+
+/* focus-visible for keyboard users */
+:focus { outline-offset:2px }
+:focus:not(:focus-visible) { box-shadow:none }
+
+/* Printable board view */
+@media print {
+  .sidebar, .topbar, .btn, .btn-ghost, .nav-link { display:none !important; }
+  body { background: white; color: black; }
+  .kanban-column { height: auto; page-break-inside:avoid; }
+  .card{box-shadow:none;border:1px solid #ddd}
+  .main { padding: 8px; }
+}
